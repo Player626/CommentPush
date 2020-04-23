@@ -4,7 +4,8 @@
 
 ## 使用方法：
 
-- 把 `CommentPush` 整个目录拷贝到 `Typecho` 安装路径的 `/usr/plugins` 下面（切记不能修改目录名，否则失效！！）
+- 插件目录名字必须为 `CommentPush` （切记不能修改目录名，否则失效！！）
+- 把 `CommentPush` 整个目录拷贝到 `Typecho` 安装路径的 `/usr/plugins` 下面
 - 登录 `Typecho` 后台，启用插件，进行插件设置。
 - 目前支持推送功能：Server酱，Qmsg酱。
 
