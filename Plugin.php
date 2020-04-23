@@ -36,7 +36,7 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
         $services = new Typecho_Widget_Helper_Form_Element_Checkbox('services', [
             "QQService" => "Qmsg酱",
             "WeChatService" => 'Server酱'
-        ], 'services', _t('选择通知服务'), _t('可多选同时推送'));
+        ], 'services', _t('选择通知服务 多选同时推送'), _t('插件作者：<br><a href="https://www.gaobinzhan.com">高彬展</a><br><a href="https://blog.say521.cn/">奥秘Sir</a>'));
         $form->addInput($services->addRule('required', _t('必须选择一项通知服务')));
 
         $qqApiUrl = new Typecho_Widget_Helper_Form_Element_Text('qqApiUrl', NULL, NULL, _t('Qmsg酱接口'), _t("当选择Qmsg酱必须填写"));
@@ -72,7 +72,7 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
 
         $isPushBlogger = $plugin->isPushBlogger;
 
-        if ($isPushBlogger) return $comment;
+        if ($comment['authorId'] == 1 && $isPushBlogger == 1) return $comment;
 
         $services = $plugin->services;
 
