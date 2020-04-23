@@ -20,7 +20,7 @@ class WeChatService implements ServiceInterface
         $template = '标题：' . $title . PHP_EOL
             . '评论人：' . $author . PHP_EOL
             . '评论内容：' . $context . PHP_EOL
-            . '链接：' . $link;
+            . '链接：' . $link . '#comment-' . $comment['coid'];
 
         $params = http_build_query([
             'text' => '有人给你评论啦！！',

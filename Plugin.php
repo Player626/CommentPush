@@ -13,12 +13,16 @@ require 'lib/WeChatService.php';
 
 class CommentPush_Plugin implements Typecho_Plugin_Interface
 {
+    protected static $comment;
+    protected static $active;
+
     /**
      * @return string|void
      */
     public static function activate()
     {
-        Typecho_Plugin::factory('Widget_Feedback')->comment = [__CLASS__, 'pushService'];
+        Typecho_Plugin::factory('Widget_Feedback')->comment = [__CLASS__, 'pushServiceReady'];
+        Typecho_Plugin::factory('Widget_Feedback')->finishComment = [__CLASS__, 'pushServiceGo'];
         return _t('CommentPush插件启用成功');
     }
 
@@ -65,22 +69,31 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
     }
 
 
-    public static function pushService($comment, $active)
+    public static function pushServiceReady($comment, $active)
+    {
+        self::$comment = $comment;
+        self::$active = $active;
+
+        return $comment;
+    }
+
+    public static function pushServiceGo($comment)
     {
         $options = Helper::options();
         $plugin = $options->plugin('CommentPush');
 
         $isPushBlogger = $plugin->isPushBlogger;
 
-        if ($comment['authorId'] == 1 && $isPushBlogger == 1) return $comment;
+        if (self::$comment['authorId'] == 1 && $isPushBlogger == 1) return false;
 
         $services = $plugin->services;
 
-        if (!$services || $services == 'services') return $comment;
+        if (!$services || $services == 'services') return false;
+
+
+        self::$comment['coid'] = $comment->coid;
 
         /** @var QQService | WeChatService $service */
-        foreach ($services as $service) call_user_func([$service, '__handler'], $active, $comment, $plugin);
-
-        return $comment;
+        foreach ($services as $service) call_user_func([$service, '__handler'], self::$active, self::$comment, $plugin);
     }
 }
