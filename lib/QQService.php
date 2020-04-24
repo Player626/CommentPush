@@ -29,15 +29,14 @@ class QQService implements ServiceInterface
             'msg' => $template
         ]);
 
-        $options = array('http' =>
-            array(
+        $context = stream_context_create([
+            'http' => [
                 'method' => 'POST',
                 'header' => 'Content-type: application/x-www-form-urlencoded',
                 'content' => $params
-            )
-        );
+            ]
+        ]);
 
-        $context = stream_context_create($options);
         return file_get_contents($qqApiUrl, false, $context);
     }
 }
