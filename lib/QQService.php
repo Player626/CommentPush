@@ -9,6 +9,9 @@ class QQService implements ServiceInterface
 {
     public function __handler($active, $comment, $plugin)
     {
+        $isPushBlogger = $plugin->isPushBlogger;
+        if ($comment['authorId'] == 1 && $isPushBlogger == 1 ) return false;
+
         $qqApiUrl = $plugin->qqApiUrl;
         $receiveQq = $plugin->receiveQq;
 

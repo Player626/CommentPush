@@ -9,6 +9,10 @@ class WeChatService implements ServiceInterface
 {
     public function __handler($active, $comment, $plugin)
     {
+        $isPushBlogger = $plugin->isPushBlogger;
+        if ($comment['authorId'] == 1 && $isPushBlogger == 1 ) return false;
+
+
         $weChatScKey = $plugin->weChatScKey;
         if (empty($weChatScKey)) return false;
 
