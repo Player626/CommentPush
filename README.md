@@ -8,6 +8,7 @@
 - 把 `CommentPush` 整个目录拷贝到 `Typecho` 安装路径的 `/usr/plugins` 下面
 - 登录 `Typecho` 后台，启用插件，进行插件设置。
 - 目前支持推送功能：Server酱，Qmsg酱，阿里云邮件。
+- 推送日志记录
 
 ## 推送服务
 

@@ -3,10 +3,10 @@
  * @author gaobinzhan <gaobinzhan@gmail.com>
  */
 
-require_once 'Contract/ServiceInterface.php';
+require_once 'Service.php';
 
 
-class AliYunEmailService implements ServiceInterface
+class AliYunEmailService extends Service
 {
     const HANGZHOU = 'hangzhou';
     const SINGAPORE = 'singapore';
@@ -32,75 +32,80 @@ class AliYunEmailService implements ServiceInterface
 
     public function __handler($active, $comment, $plugin)
     {
-        $isPushBlogger = $plugin->isPushBlogger;
-        if ($comment['authorId'] == 1 && $isPushBlogger == 1 && !$comment['parent']) return false;
+        try {
+            $isPushBlogger = $plugin->isPushBlogger;
+            if ($comment['authorId'] == 1 && $isPushBlogger == 1 && !$comment['parent']) return false;
 
-        $isPushCommentReply = $plugin->isPushCommentReply;
+            $isPushCommentReply = $plugin->isPushCommentReply;
 
-        $options = Helper::options();
-        $accountName = $plugin->accountName;
-        $regionId = $plugin->regionId;
-        $accessKeyId = $plugin->accessKeyId;
-        $accessKeySecret = $plugin->accessKeySecret;
-        $fromAlias = empty($plugin->fromAlias) ? $options->title : $plugin->fromAlias;
-        $toAddress = $comment['mail'];
+            $options = Helper::options();
+            $accountName = $plugin->accountName;
+            $regionId = $plugin->regionId;
+            $accessKeyId = $plugin->accessKeyId;
+            $accessKeySecret = $plugin->accessKeySecret;
+            $fromAlias = empty($plugin->fromAlias) ? $options->title : $plugin->fromAlias;
+            $toAddress = $comment['mail'];
 
-        $regionInfo = self::$regions[$regionId];
-
-
-        if (empty($accountName) || empty($accessKeyId) || empty($accessKeySecret) || empty($regionInfo)) return false;
+            $regionInfo = self::$regions[$regionId];
 
 
-        $parentComment = NULL;
+            if (empty($accountName) || empty($accessKeyId) || empty($accessKeySecret) || empty($regionInfo)) throw new \Exception('缺少阿里云邮件推送配置');
 
-        if ($comment['authorId'] != $comment['ownerId']) {
-            $author = self::getWidget('Users', 'uid', $comment['ownerId']);
-            $toAddress = $author->mail;
+
             $parentComment = NULL;
-        }
 
-
-        if ($comment['parent'] && $comment['parent'] > 0) {
-            $parentComment = self::getWidget('Comments', 'coid', $comment['parent']);
-            if (isset($parentComment->coid) && $comment['mail'] != $parentComment->mail) {
-                $toAddress = $parentComment->mail;
+            if ($comment['authorId'] != $comment['ownerId']) {
+                $author = self::getWidget('Users', 'uid', $comment['ownerId']);
+                $toAddress = $author->mail;
+                $parentComment = NULL;
             }
+
+
+            if ($comment['parent'] && $comment['parent'] > 0) {
+                $parentComment = self::getWidget('Comments', 'coid', $comment['parent']);
+                if (isset($parentComment->coid) && $comment['mail'] != $parentComment->mail) {
+                    $toAddress = $parentComment->mail;
+                }
+            }
+
+            if (!is_null($parentComment) && $isPushCommentReply != 1) return false;
+
+            list($subject, $body) = self::getSubjectAndBody($parentComment, $options, $comment, $active);
+
+
+            $data = [
+                'Action' => 'SingleSendMail',
+                'AccountName' => $accountName,
+                'ReplyToAddress' => "true",
+                'AddressType' => 1,
+                'ToAddress' => $toAddress,
+                'FromAlias' => $fromAlias,
+                'Subject' => $subject,
+                'HtmlBody' => $body,
+                'Format' => 'JSON',
+                'Version' => $regionInfo['version'],
+                'AccessKeyId' => $accessKeyId,
+                'SignatureMethod' => 'HMAC-SHA1',
+                'Timestamp' => gmdate('Y-m-d\TH:i:s\Z'),
+                'SignatureVersion' => '1.0',
+                'SignatureNonce' => md5(time()),
+                'RegionId' => $regionInfo['regionId']
+            ];
+            $data['Signature'] = self::sign($data, $accessKeySecret);
+
+
+            $content = stream_context_create([
+                'http' => [
+                    'method' => 'POST',
+                    'header' => 'Content-type: application/x-www-form-urlencoded',
+                    'content' => self::getPostHttpBody($data)
+                ]
+            ]);
+            $result = file_get_contents($regionInfo['host'], null, $content);
+            self::logger(__CLASS__, $toAddress, $data, $result);
+        } catch (\Exception $exception) {
+            self::logger(__CLASS__, '', '', '', $exception->getMessage());
         }
-
-        if (!is_null($parentComment) && $isPushCommentReply != 1) return false;
-
-        list($subject, $body) = self::getSubjectAndBody($parentComment, $options, $comment, $active);
-
-
-        $data = [
-            'Action' => 'SingleSendMail',
-            'AccountName' => $accountName,
-            'ReplyToAddress' => "true",
-            'AddressType' => 1,
-            'ToAddress' => $toAddress,
-            'FromAlias' => $fromAlias,
-            'Subject' => $subject,
-            'HtmlBody' => $body,
-            'Format' => 'JSON',
-            'Version' => $regionInfo['version'],
-            'AccessKeyId' => $accessKeyId,
-            'SignatureMethod' => 'HMAC-SHA1',
-            'Timestamp' => gmdate('Y-m-d\TH:i:s\Z'),
-            'SignatureVersion' => '1.0',
-            'SignatureNonce' => md5(time()),
-            'RegionId' => $regionInfo['regionId']
-        ];
-        $data['Signature'] = self::sign($data, $accessKeySecret);
-
-
-        $content = stream_context_create([
-            'http' => [
-                'method' => 'POST',
-                'header' => 'Content-type: application/x-www-form-urlencoded',
-                'content' => self::getPostHttpBody($data)
-            ]
-        ]);
-        return file_get_contents($regionInfo['host'], null, $content);
     }
 
 
@@ -132,12 +137,12 @@ class AliYunEmailService implements ServiceInterface
                 trim($options->siteUrl),
                 trim($options->title),
                 trim($parentComment->author),
-                trim($active->permalink.'#comment-' . $comment['coid']),
+                trim($active->permalink . '#comment-' . $comment['coid']),
                 trim($active->title),
                 trim($parentComment->text),
                 trim($comment['author']),
                 trim($comment['text']),
-                trim($active->permalink.'#comment-' . $comment['coid'])
+                trim($active->permalink . '#comment-' . $comment['coid'])
             ], $html) : str_replace(
             [
                 '{blogUrl}',
@@ -151,7 +156,7 @@ class AliYunEmailService implements ServiceInterface
                 trim($options->siteUrl),
                 trim($options->title),
                 trim($comment['author']),
-                trim($active->permalink.'#comment-' . $comment['coid']),
+                trim($active->permalink . '#comment-' . $comment['coid']),
                 trim($active->title),
                 trim($comment['text'])
             ], $html
@@ -205,4 +210,6 @@ class AliYunEmailService implements ServiceInterface
         foreach ($param as $k => $v) $str .= $k . '=' . urlencode($v) . '&';
         return substr($str, 0, -1);
     }
+
+
 }

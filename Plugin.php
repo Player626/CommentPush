@@ -4,7 +4,7 @@
  *
  * @package CommentPush
  * @author 高彬展,奥秘Sir
- * @version 1.1.0
+ * @version 1.2.0
  * @link https://github.com/gaobinzhan/CommentPush
  */
 
@@ -22,15 +22,51 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
      */
     public static function activate()
     {
+        self::addTable();
         Typecho_Plugin::factory('Widget_Feedback')->comment = [__CLASS__, 'pushServiceReady'];
         Typecho_Plugin::factory('Widget_Feedback')->finishComment = [__CLASS__, 'pushServiceGo'];
+
+        Helper::addPanel(1, 'CommentPush/Logs.php', 'CommentPush日志', 'CommentPush日志', 'administrator');
         return _t('CommentPush插件启用成功');
+    }
+
+
+    private static function addTable()
+    {
+        $db = Typecho_Db::get();
+        $prefix = $db->getPrefix();
+        $sql = "CREATE TABLE IF NOT EXISTS `{$prefix}comment_push` (
+                    `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+                    `service` text COMMENT '服务',
+                    `object` text COMMENT '对象',
+                    `context` text COMMENT '内容',
+                    `result` text COMMENT '结果',
+                    `error` text COMMENT '错误信息',
+                    `time` bigint COMMENT '时间',
+                    PRIMARY KEY (`id`)
+                )DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci";
+        $db->query($sql);
+    }
+
+    private static function removeTable()
+    {
+        $db = Typecho_Db::get();
+        $prefix = $db->getPrefix();
+        try {
+            $db->query("DROP TABLE `" . $prefix . "comment_push`", Typecho_Db::WRITE);
+        } catch (Typecho_Exception $e) {
+            return "删除CommentPush日志表失败！";
+        }
+        return "删除CommentPush日志表成功！";
     }
 
 
     public static function deactivate()
     {
-        // TODO: Implement deactivate() method.
+        Helper::removePanel(1, 'CommentPush/Logs.php');
+        if (Helper::options()->plugin('CommentPush')->isDelete == 1) {
+            self::removeTable();
+        }
     }
 
     /**
@@ -60,6 +96,9 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
             0 => '否'
         ], 1, _t('当作者回复评论向对方发送邮件'), _t('如果选择“否”，将不推送'));
         $form->addInput($isPushCommentReply);
+
+        $isDelete = new Typecho_Widget_Helper_Form_Element_Radio('isDelete', [0 => '不删除', 1 => '删除'], 1, _t('卸载是否删除数据表'));
+        $form->addInput($isDelete);
 
         $qqServiceTitle = new Typecho_Widget_Helper_Layout('div', ['class=' => 'typecho-page-title']);
         $qqServiceTitle->html('<h2>Qmsg酱配置</h2>');
