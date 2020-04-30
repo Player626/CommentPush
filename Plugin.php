@@ -4,13 +4,14 @@
  *
  * @package CommentPush
  * @author 高彬展,奥秘Sir
- * @version 1.2.0
+ * @version 1.3.0
  * @link https://github.com/gaobinzhan/CommentPush
  */
 
 require 'lib/QQService.php';
 require 'lib/WeChatService.php';
 require 'lib/AliYunEmailService.php';
+require 'lib/SmtpService.php';
 
 class CommentPush_Plugin implements Typecho_Plugin_Interface
 {
@@ -19,6 +20,7 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
 
     /**
      * @return string|void
+     * @throws Typecho_Db_Exception
      */
     public static function activate()
     {
@@ -31,6 +33,21 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
     }
 
 
+    /**
+     * @throws Typecho_Db_Exception
+     * @throws Typecho_Plugin_Exception
+     */
+    public static function deactivate()
+    {
+        Helper::removePanel(1, 'CommentPush/Logs.php');
+        if (Helper::options()->plugin('CommentPush')->isDelete == 1) {
+            self::removeTable();
+        }
+    }
+
+    /**
+     * @throws Typecho_Db_Exception
+     */
     private static function addTable()
     {
         $db = Typecho_Db::get();
@@ -48,6 +65,10 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
         $db->query($sql);
     }
 
+    /**
+     * @return string
+     * @throws Typecho_Db_Exception
+     */
     private static function removeTable()
     {
         $db = Typecho_Db::get();
@@ -58,15 +79,6 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
             return "删除CommentPush日志表失败！";
         }
         return "删除CommentPush日志表成功！";
-    }
-
-
-    public static function deactivate()
-    {
-        Helper::removePanel(1, 'CommentPush/Logs.php');
-        if (Helper::options()->plugin('CommentPush')->isDelete == 1) {
-            self::removeTable();
-        }
     }
 
     /**
@@ -81,7 +93,8 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
         $services = new Typecho_Widget_Helper_Form_Element_Checkbox('services', [
             "QQService" => _t('Qmsg酱'),
             "WeChatService" => _t('Server酱'),
-            "AliYunEmailService" => _t('阿里云邮件')
+            "AliYunEmailService" => _t('阿里云邮件'),
+            "SmtpService" => _t('SMTP')
         ], 'services', _t('推送服务 多选同时推送'), _t('插件作者：<a href="https://www.gaobinzhan.com">高彬展</a>&nbsp;<a href="https://blog.say521.cn/">奥秘Sir</a>'));
         $form->addInput($services->addRule('required', _t('必须选择一项推送服务')));
 
@@ -100,6 +113,20 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
         $isDelete = new Typecho_Widget_Helper_Form_Element_Radio('isDelete', [0 => '不删除', 1 => '删除'], 1, _t('卸载是否删除数据表'));
         $form->addInput($isDelete);
 
+        self::qqService($form);
+        self::weChatService($form);
+        self::aliYunMailService($form);
+        self::smtpService($form);
+
+
+    }
+
+    /**
+     * Qmsg酱配置面板
+     * @param Typecho_Widget_Helper_Form $form
+     */
+    private static function qqService(Typecho_Widget_Helper_Form $form)
+    {
         $qqServiceTitle = new Typecho_Widget_Helper_Layout('div', ['class=' => 'typecho-page-title']);
         $qqServiceTitle->html('<h2>Qmsg酱配置</h2>');
         $form->addItem($qqServiceTitle);
@@ -109,15 +136,28 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
 
         $receiveQq = new Typecho_Widget_Helper_Form_Element_Text('receiveQq', NULL, NULL, _t('接收消息的QQ，可以添加多个，以英文逗号分割'), _t("当选择Qmsg酱必须填写（指定的QQ必须在您的QQ号列表中）"));
         $form->addInput($receiveQq);
+    }
 
-
+    /**
+     * Server酱配置面板
+     * @param Typecho_Widget_Helper_Form $form
+     */
+    private static function weChatService(Typecho_Widget_Helper_Form $form)
+    {
         $weChatServiceTitle = new Typecho_Widget_Helper_Layout('div', ['class=' => 'typecho-page-title']);
         $weChatServiceTitle->html('<h2>Server酱配置</h2>');
         $form->addItem($weChatServiceTitle);
 
         $weChatScKey = new Typecho_Widget_Helper_Form_Element_Text('weChatScKey', NULL, NULL, _t('Server酱 SCKEY'), _t("当选择Server酱必须填写"));
         $form->addInput($weChatScKey);
+    }
 
+    /**
+     * 阿里云邮件配置面板
+     * @param Typecho_Widget_Helper_Form $form
+     */
+    private static function aliYunMailService(Typecho_Widget_Helper_Form $form)
+    {
         $aliYunEmailServiceTitle = new Typecho_Widget_Helper_Layout('div', ['class=' => 'typecho-page-title']);
         $aliYunEmailServiceTitle->html('<h2>阿里云邮件配置</h2>');
         $form->addItem($aliYunEmailServiceTitle);
@@ -141,8 +181,38 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
 
         $aliYunAccountName = new Typecho_Widget_Helper_Form_Element_Text('accountName', NULL, NULL, _t('发件邮箱地址'), _t('邮件中显示的发信地址'));
         $form->addInput($aliYunAccountName->addRule('email', _t('请输入正确的邮箱地址')));
+    }
 
+    /**
+     * SMTP配置面板
+     * @param Typecho_Widget_Helper_Form $form
+     */
+    private static function smtpService(Typecho_Widget_Helper_Form $form)
+    {
+        $smtpServiceTitle = new Typecho_Widget_Helper_Layout('div', ['class=' => 'typecho-page-title']);
+        $smtpServiceTitle->html('<h2>SMTP配置</h2>');
+        $form->addItem($smtpServiceTitle);
 
+        $smtpHost = new Typecho_Widget_Helper_Form_Element_Text('smtpHost', NULL, NULL, _t('SMTP地址'), _t('SMTP服务器连接地址'));
+        $form->addInput($smtpHost);
+
+        $smtpPort = new Typecho_Widget_Helper_Form_Element_Text('smtpPort', NULL, NULL, _t('SMTP端口'), _t('SMTP服务器连接端口'));
+        $form->addInput($smtpPort);
+
+        $smtpFromAlias = new Typecho_Widget_Helper_Form_Element_Text('smtpFromAlias', NULL, NULL, _t('发件人名称'), _t('邮件中显示的发信人名称，留空为博客名称'));
+        $form->addInput($smtpFromAlias);
+
+        $smtpUser = new Typecho_Widget_Helper_Form_Element_Text('smtpUser', NULL, NULL, _t('SMTP登录用户'), _t('SMTP登录用户名，一般为邮箱地址'));
+        $form->addInput($smtpUser);
+
+        $smtpPass = new Typecho_Widget_Helper_Form_Element_Text('smtpPass', NULL, NULL, _t('SMTP登录密码'), _t('一般为邮箱密码，但某些服务商需要生成特定密码'));
+        $form->addInput($smtpPass);
+
+        $smtpAuth = new Typecho_Widget_Helper_Form_Element_Checkbox('smtpAuth', ['enable' => _t('服务器需要验证')], ['enable'], _t('SMTP验证模式'));
+        $form->addInput($smtpAuth);
+
+        $smtpSecure = new Typecho_Widget_Helper_Form_Element_Radio('smtpSecure', ['false' => _t('无安全加密'), 'ssl' => _t('SSL加密'), 'tls' => _t('TLS加密')], 'false', _t('SMTP加密模式'));
+        $form->addInput($smtpSecure);
     }
 
     /**
@@ -174,7 +244,7 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
 
         self::$comment['coid'] = $comment->coid;
 
-        /** @var QQService | WeChatService | AliYunEmailService $service */
-        foreach ($services as $service) call_user_func([$service, '__handler'], self::$active, self::$comment, $plugin);
+        /** @var QQService | WeChatService | AliYunEmailService | SmtpService $service */
+        foreach ($services as $service) call_user_func(['SmtpService', '__handler'], self::$active, self::$comment, $plugin);
     }
 }
