@@ -245,6 +245,6 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
         self::$comment['coid'] = $comment->coid;
 
         /** @var QQService | WeChatService | AliYunEmailService | SmtpService $service */
-        foreach ($services as $service) call_user_func(['SmtpService', '__handler'], self::$active, self::$comment, $plugin);
+        foreach ($services as $service) call_user_func([$service, '__handler'], self::$active, self::$comment, $plugin);
     }
 }
