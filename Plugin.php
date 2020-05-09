@@ -4,7 +4,7 @@
  *
  * @package CommentPush
  * @author 高彬展,奥秘Sir
- * @version 1.3.0
+ * @version 1.4.0
  * @link https://github.com/gaobinzhan/CommentPush
  */
 
@@ -213,6 +213,37 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
 
         $smtpSecure = new Typecho_Widget_Helper_Form_Element_Radio('smtpSecure', ['false' => _t('无安全加密'), 'ssl' => _t('SSL加密'), 'tls' => _t('TLS加密')], 'false', _t('SMTP加密模式'));
         $form->addInput($smtpSecure);
+
+
+        $template = new Typecho_Widget_Helper_Layout('div', ['class=' => 'typecho-page-title']);
+        $template->html('<h2>邮件自定义模版</h2>');
+        $form->addItem($template);
+
+        $authorTemplate = new Typecho_Widget_Helper_Form_Element_Textarea('authorTemplate', NULL, NULL, _t('向博主发信内容模板(为空即默认模版)'),
+            _t("可选参数：
+                '{blogUrl}',
+                '{blogName}',
+                '{author}',
+                '{permalink}',
+                '{title}',
+                '{text}'
+                <br>".'写法：'.htmlspecialchars('<h1>{title}</h1>')));
+        $form->addInput($authorTemplate);
+
+        $replyTemplate = new Typecho_Widget_Helper_Form_Element_Textarea('replyTemplate', NULL, NULL, _t('向访客发信内容模板(为空即默认模版)'),
+            _t("可选参数：
+                '{blogUrl}',
+                '{blogName}',
+                '{author}',
+                '{permalink}',
+                '{title}',
+                '{text}',
+                '{replyAuthor}',
+                '{replyText}',
+                '{commentUrl}'
+                <br>".'写法：'.htmlspecialchars('<h1>{title}</h1>')));
+        $form->addInput($replyTemplate);
+
     }
 
     /**

@@ -26,6 +26,9 @@ class SmtpService extends Service
             $smtpAuth = $plugin->smtpAuth;
             $smtpSecure = $plugin->smtpSecure;
 
+            $authorTemplate = $plugin->authorTemplate;
+            $replyTemplate = $plugin->replyTemplate;
+
             $smtpFromAlias = empty($plugin->smtpFromAlias) ? $options->title : $plugin->smtpFromAlias;
             $toAddress = $comment['mail'];
 
@@ -51,7 +54,7 @@ class SmtpService extends Service
 
             if (!is_null($parentComment) && $isPushCommentReply != 1) return false;
 
-            list($subject, $body) = self::getSubjectAndBody($parentComment, $options, $comment, $active);
+            list($subject, $body) = self::getSubjectAndBody($parentComment, $options, $comment, $active, $authorTemplate, $replyTemplate);
 
 
             $mail = new PHPMailer(true);
@@ -78,11 +81,27 @@ class SmtpService extends Service
         }
     }
 
-    private function getSubjectAndBody($parentComment, $options, $comment, $active)
+    private function getSubjectAndBody($parentComment, $options, $comment, $active, $authorTemplate, $replyTemplate)
     {
-        $html = !is_null($parentComment) ?
+
+        if (!is_null($parentComment)) {
+            if (is_null($replyTemplate) || empty($replyTemplate)) {
+                $html = file_get_contents(dirname(__DIR__) . '/theme/reply.html');
+            } else {
+                $html = $replyTemplate;
+            }
+        } else {
+            if (is_null($authorTemplate) || empty($authorTemplate)) {
+                $html = file_get_contents(dirname(__DIR__) . '/theme/author.html');
+            } else {
+                $html = $authorTemplate;
+            }
+        }
+
+
+        /*$html = !is_null($parentComment) ?
             file_get_contents(dirname(__DIR__) . '/theme/reply.html') :
-            file_get_contents(dirname(__DIR__) . '/theme/author.html');
+            file_get_contents(dirname(__DIR__) . '/theme/author.html');*/
 
 
         $subject = !is_null($parentComment) ?
