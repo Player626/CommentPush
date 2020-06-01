@@ -4,7 +4,7 @@
  *
  * @package CommentPush
  * @author 高彬展,奥秘Sir
- * @version 1.4.0
+ * @version 1.4.2
  * @link https://github.com/gaobinzhan/CommentPush
  */
 
@@ -12,6 +12,8 @@ require 'lib/QQService.php';
 require 'lib/WeChatService.php';
 require 'lib/AliYunEmailService.php';
 require 'lib/SmtpService.php';
+require 'lib/DingTalkBotService.php';
+require 'lib/EnterpriseWeChatService.php';
 
 class CommentPush_Plugin implements Typecho_Plugin_Interface
 {
@@ -94,7 +96,9 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
             "QQService" => _t('Qmsg酱'),
             "WeChatService" => _t('Server酱'),
             "AliYunEmailService" => _t('阿里云邮件'),
-            "SmtpService" => _t('SMTP')
+            "SmtpService" => _t('SMTP'),
+            "DingTalkBotService" => _t('钉钉机器人'),
+            "EnterpriseWeChatService" => _t('企业微信机器人')
         ], 'services', _t('推送服务 多选同时推送'), _t('插件作者：<a href="https://www.gaobinzhan.com">高彬展</a>&nbsp;<a href="https://blog.say521.cn/">奥秘Sir</a>'));
         $form->addInput($services->addRule('required', _t('必须选择一项推送服务')));
 
@@ -117,6 +121,8 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
         self::weChatService($form);
         self::aliYunMailService($form);
         self::smtpService($form);
+        self::DingTalkBotService($form);
+        self::EnterpriseWeChatService($form);
 
 
     }
@@ -247,6 +253,37 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
     }
 
     /**
+     * 钉钉机器人配置面板
+     * @param Typecho_Widget_Helper_Form $form
+     */
+    private static function DingTalkBotService(Typecho_Widget_Helper_Form $form)
+    {
+        $DingTalkBotServiceTitle = new Typecho_Widget_Helper_Layout('div', ['class=' => 'typecho-page-title']);
+        $DingTalkBotServiceTitle->html('<h2>钉钉机器人配置</h2>');
+        $form->addItem($DingTalkBotServiceTitle);
+
+        $DingTalkWebhook = new Typecho_Widget_Helper_Form_Element_Text('DingTalkWebhook', NULL, NULL, _t('钉钉 Webhook 地址'), _t("当选择钉钉机器人必须填写"));
+        $form->addInput($DingTalkWebhook);
+
+        $DingTalkSecret = new Typecho_Widget_Helper_Form_Element_Text('DingTalkSecret', NULL, NULL, _t('安全设置加签密钥'), _t("当选择钉钉机器人必须填写（安全设置:加签）"));
+        $form->addInput($DingTalkSecret);
+    }
+
+    /**
+     * 企业微信机器人配置面板
+     * @param Typecho_Widget_Helper_Form $form
+     */
+    private static function EnterpriseWeChatService(Typecho_Widget_Helper_Form $form)
+    {
+        $EnterpriseWeChatServiceTitle = new Typecho_Widget_Helper_Layout('div', ['class=' => 'typecho-page-title']);
+        $EnterpriseWeChatServiceTitle->html('<h2>Server酱配置</h2>');
+        $form->addItem($EnterpriseWeChatServiceTitle);
+
+        $EnterpriseWeChatWebhook = new Typecho_Widget_Helper_Form_Element_Text('EnterpriseWeChatWebhook', NULL, NULL, _t('企业微信 Webhook 地址'), _t("当选择企业微信机器人必须填写"));
+        $form->addInput($EnterpriseWeChatWebhook);
+    }
+
+    /**
      * @param Typecho_Widget_Helper_Form $form
      */
     public static function personalConfig(Typecho_Widget_Helper_Form $form)
@@ -275,7 +312,7 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
 
         self::$comment['coid'] = $comment->coid;
 
-        /** @var QQService | WeChatService | AliYunEmailService | SmtpService $service */
+        /** @var QQService | WeChatService | AliYunEmailService | SmtpService | DingTalkBotService | EnterpriseWeChatService $service */
         foreach ($services as $service) call_user_func([$service, '__handler'], self::$active, self::$comment, $plugin);
     }
 }
