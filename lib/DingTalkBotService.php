@@ -45,9 +45,8 @@ class DingTalkBotService extends Service
 
             list($s1, $s2) = explode(' ', microtime());
             $timestamp = (float)sprintf('%.0f', (floatval($s1) + floatval($s2)) * 1000);
-            $secret = 'SEC1f24ffce3c3818f5b583a5980f64a15b4d25cd18425d74cba06115cbdef282a9';
-            $stringToSign = $timestamp . "\n" . $secret;
-            $signature = base64_encode(hash_hmac('sha256', $stringToSign, $secret, true));
+            $stringToSign = $timestamp . "\n" . $DingTalkSecret;
+            $signature = base64_encode(hash_hmac('sha256', $stringToSign, $DingTalkSecret, true));
             $signature = utf8_encode(urlencode($signature));
             $DingTalkWebhook .="&timestamp=$timestamp&sign=$signature";
             $result = file_get_contents($DingTalkWebhook, null, $context);
