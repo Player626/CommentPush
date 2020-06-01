@@ -4,7 +4,7 @@
  *
  * @package CommentPush
  * @author 高彬展,奥秘Sir
- * @version 1.4.2
+ * @version 1.5.0
  * @link https://github.com/gaobinzhan/CommentPush
  */
 
@@ -276,7 +276,7 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
     private static function EnterpriseWeChatService(Typecho_Widget_Helper_Form $form)
     {
         $EnterpriseWeChatServiceTitle = new Typecho_Widget_Helper_Layout('div', ['class=' => 'typecho-page-title']);
-        $EnterpriseWeChatServiceTitle->html('<h2>Server酱配置</h2>');
+        $EnterpriseWeChatServiceTitle->html('<h2>企业微信机器人配置</h2>');
         $form->addItem($EnterpriseWeChatServiceTitle);
 
         $EnterpriseWeChatWebhook = new Typecho_Widget_Helper_Form_Element_Text('EnterpriseWeChatWebhook', NULL, NULL, _t('企业微信 Webhook 地址'), _t("当选择企业微信机器人必须填写"));
