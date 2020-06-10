@@ -4,7 +4,7 @@
  *
  * @package CommentPush
  * @author 高彬展,奥秘Sir
- * @version 1.5.0
+ * @version 1.6.0
  * @link https://github.com/gaobinzhan/CommentPush
  */
 
@@ -53,18 +53,38 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
     private static function addTable()
     {
         $db = Typecho_Db::get();
-        $prefix = $db->getPrefix();
-        $sql = "CREATE TABLE IF NOT EXISTS `{$prefix}comment_push` (
-                    `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
-                    `service` text COMMENT '服务',
-                    `object` text COMMENT '对象',
-                    `context` text COMMENT '内容',
-                    `result` text COMMENT '结果',
-                    `error` text COMMENT '错误信息',
-                    `time` bigint COMMENT '时间',
-                    PRIMARY KEY (`id`)
-                )DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci";
+
+        $sql = self::getSql($db, 'install');
+
         $db->query($sql);
+    }
+
+    /**
+     * @param $db
+     * @param string $path
+     * @return string|string[]
+     */
+    private static function getSql($db, $path = 'install')
+    {
+        $adapter = $db->getAdapterName();
+        $prefix = $db->getPrefix();
+
+        if ($adapter === 'Pdo_Mysql') {
+            $sqlTemplate = file_get_contents(__DIR__ . '/sql/' . $path . '/Mysql.sql');
+        }
+
+        if ($adapter === 'Pdo_SQLite') {
+            $sqlTemplate = file_get_contents(__DIR__ . '/sql/' . $path . '/SQLite.sql');
+        }
+
+        if ($adapter === 'Pdo_Pgsql') {
+            $sqlTemplate = file_get_contents(__DIR__ . '/sql/' . $path . '/Pgsql.sql');
+        }
+
+        if (empty($sqlTemplate)) throw new \Exception('暂不支持你的数据库');
+
+        $sql = str_replace('{prefix}', $prefix, $sqlTemplate);
+        return $sql;
     }
 
     /**
@@ -74,9 +94,9 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
     private static function removeTable()
     {
         $db = Typecho_Db::get();
-        $prefix = $db->getPrefix();
+        $sql = self::getSql($db, 'uninstall');
         try {
-            $db->query("DROP TABLE `" . $prefix . "comment_push`", Typecho_Db::WRITE);
+            $db->query($sql, Typecho_Db::WRITE);
         } catch (Typecho_Exception $e) {
             return "删除CommentPush日志表失败！";
         }
@@ -233,7 +253,7 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
                 '{permalink}',
                 '{title}',
                 '{text}'
-                <br>".'写法：'.htmlspecialchars('<h1>{title}</h1>')));
+                <br>" . '写法：' . htmlspecialchars('<h1>{title}</h1>')));
         $form->addInput($authorTemplate);
 
         $replyTemplate = new Typecho_Widget_Helper_Form_Element_Textarea('replyTemplate', NULL, NULL, _t('向访客发信内容模板(为空即默认模版)'),
@@ -247,7 +267,7 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
                 '{replyAuthor}',
                 '{replyText}',
                 '{commentUrl}'
-                <br>".'写法：'.htmlspecialchars('<h1>{title}</h1>')));
+                <br>" . '写法：' . htmlspecialchars('<h1>{title}</h1>')));
         $form->addInput($replyTemplate);
 
     }

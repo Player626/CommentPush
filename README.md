@@ -11,6 +11,11 @@
 - 推送日志记录
 - 自定义邮件推送模版
 
+## 数据库适配
+
+- 支持Pdo_Mysql
+- 支持Pdo_SQLite
+
 ## 推送服务
 
 [Server酱](http://sc.ftqq.com)
