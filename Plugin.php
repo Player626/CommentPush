@@ -4,7 +4,7 @@
  *
  * @package CommentPush
  * @author 高彬展,奥秘Sir
- * @version 1.6.0
+ * @version 1.6.1
  * @link https://github.com/gaobinzhan/CommentPush
  */
 
@@ -69,7 +69,7 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
         $adapter = $db->getAdapterName();
         $prefix = $db->getPrefix();
 
-        if ($adapter === 'Pdo_Mysql') {
+        if ($adapter === 'Pdo_Mysql' || $adapter === 'Mysql' || $adapter === 'Mysqli') {
             $sqlTemplate = file_get_contents(__DIR__ . '/sql/' . $path . '/Mysql.sql');
         }
 
