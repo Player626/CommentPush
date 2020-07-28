@@ -150,7 +150,8 @@ class AliYunEmailService extends Service
                 '{author}',
                 '{permalink}',
                 '{title}',
-                '{text}'
+                '{text}',
+                '{ip}'
             ],
             [
                 trim($options->siteUrl),
@@ -158,7 +159,8 @@ class AliYunEmailService extends Service
                 trim($comment['author']),
                 trim($active->permalink . '#comment-' . $comment['coid']),
                 trim($active->title),
-                trim($comment['text'])
+                trim($comment['text']),
+                trim($comment['ip'])
             ], $html
         );
 

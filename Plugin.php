@@ -4,8 +4,9 @@
  *
  * @package CommentPush
  * @author 高彬展,奥秘Sir
- * @version 1.6.1
+ * @version 1.6.2
  * @link https://github.com/gaobinzhan/CommentPush
+ * @blog https://blog.gaobinzhan.com
  */
 
 require 'lib/QQService.php';
@@ -252,7 +253,8 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
                 '{author}',
                 '{permalink}',
                 '{title}',
-                '{text}'
+                '{text}',
+                '{ip}'
                 <br>" . '写法：' . htmlspecialchars('<h1>{title}</h1>')));
         $form->addInput($authorTemplate);
 

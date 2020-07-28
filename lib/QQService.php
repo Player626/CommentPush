@@ -24,7 +24,7 @@ class QQService extends Service
             $context = $comment['text'];
 
             $template = '标题：' . $title . PHP_EOL
-                . '评论人：' . $author . PHP_EOL
+                . '评论人：' . $author . " [{$comment['ip']}]" . PHP_EOL
                 . '评论内容：' . $context . PHP_EOL
                 . '链接：' . $link . '#comment-' . $comment['coid'];
 

@@ -24,7 +24,7 @@ class DingTalkBotService extends Service
             $context = $comment['text'];
 
             $template = '标题：' . $title . PHP_EOL
-                . '评论人：' . $author . PHP_EOL
+                . '评论人：' . $author . " [{$comment['ip']}]" . PHP_EOL
                 . '评论内容：' . $context . PHP_EOL
                 . '链接：' . $link . '#comment-' . $comment['coid'];
 
@@ -48,7 +48,7 @@ class DingTalkBotService extends Service
             $stringToSign = $timestamp . "\n" . $DingTalkSecret;
             $signature = base64_encode(hash_hmac('sha256', $stringToSign, $DingTalkSecret, true));
             $signature = utf8_encode(urlencode($signature));
-            $DingTalkWebhook .="&timestamp=$timestamp&sign=$signature";
+            $DingTalkWebhook .= "&timestamp=$timestamp&sign=$signature";
             $result = file_get_contents($DingTalkWebhook, null, $context);
             self::logger(__CLASS__, '', $params, $result);
         } catch (\Exception $exception) {
