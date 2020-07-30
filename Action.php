@@ -18,6 +18,8 @@ class CommentPush_Action extends Typecho_Widget implements Widget_Interface_Do
         $signature = $_GET["signature"];
         $timestamp = $_GET["timestamp"];
         $nonce = $_GET["nonce"];
+        $echostr = $_GET["echostr"];
+
 
         $token = $options->plugin('CommentPush')->officialAccountToken;
         $tmpArr = array($token, $timestamp, $nonce);
@@ -25,9 +27,10 @@ class CommentPush_Action extends Typecho_Widget implements Widget_Interface_Do
         $tmpStr = implode($tmpArr);
         $tmpStr = sha1($tmpStr);
 
-        if ($tmpStr != $signature) {
-            return false;
+        if ($tmpStr == $signature) {
+            echo $echostr;
+        } else {
+            echo false;
         }
-        return true;
     }
 }
