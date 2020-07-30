@@ -32,7 +32,7 @@ class OfficialAccountService extends Service
             $link = $active->permalink;
             $context = $comment['text'];
 
-            $params = http_build_query([
+            $params = json_encode([
                 'touser' => $openid,
                 'template_id' => $templateId,
                 'url' => $link . '#comment-' . $comment['coid'],
@@ -61,7 +61,7 @@ class OfficialAccountService extends Service
                 'http' => [
                     'method' => 'POST',
                     'header' => 'Content-type: application/x-www-form-urlencoded',
-                    'content' => $params
+                    'content' => urldecode($params)
                 ]
             ]);
             $result = file_get_contents('https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=' . $accessToken, false, $context);
