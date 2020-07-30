@@ -328,7 +328,11 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
         $openId = new Typecho_Widget_Helper_Form_Element_Text('officialAccountOpenid', null, null, _t('openid'), '接收信息的微信号 openid');
         $form->addInput($openId);
 
-        $templateId = new Typecho_Widget_Helper_Form_Element_Text('officialAccountTemplateId', null, null, _t('templateId'), '消息模版 templateId');
+        $templateId = new Typecho_Widget_Helper_Form_Element_Text('officialAccountTemplateId', null, null, _t('templateId'), "消息模版 templateId 可选参数：'{{title.DATA}}','{{user.DATA}}','{{ip.DATA}}','{{content.DATA}}'<br>示例（将例子复制粘贴到微信公众号模版内容即可）：
+标题：{{title.DATA}}
+评论人：{{user.DATA}}
+IP：{{ip.DATA}}
+评论内容：{{content.DATA}}");
         $form->addInput($templateId);
     }
 
