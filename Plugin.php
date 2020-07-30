@@ -316,7 +316,7 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
         $officialAccountTitle->html('<h2>微信公众号</h2>');
         $form->addItem($officialAccountTitle);
 
-        $token = new Typecho_Widget_Helper_Form_Element_Text('officialAccountToken', null, null, _t('接口配置信息 Token'), '接口配置信息 Token');
+        $token = new Typecho_Widget_Helper_Form_Element_Text('officialAccountToken', null, null, _t('接口配置信息 Token'), '接口配置信息 Token，Url为：博客地址/CommentPush/officialAccount');
         $form->addInput($token);
 
         $appId = new Typecho_Widget_Helper_Form_Element_Text('officialAccountAppId', null, null, _t('appId'), '微信公众号 appID');
