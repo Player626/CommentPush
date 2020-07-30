@@ -15,7 +15,7 @@ class OfficialAccountService extends Service
             $appSecret = $plugin->officialAccountAppSecret;
             $openid = $plugin->officialAccountOpenid;
             $templateId = $plugin->officialAccountTemplateId;
-            if (empty($token) || empty($appId) || empty($appSecret) || empty($openid) || empty($templateId)) throw new \Exception('缺少Qmsg酱配置参数');
+            if (empty($token) || empty($appId) || empty($appSecret) || empty($openid) || empty($templateId)) throw new \Exception('缺少微信公众号配置参数');
 
             $accessTokenResult = file_get_contents("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={$appId}&secret={$appSecret}");
             $accessTokenResult = json_decode($accessTokenResult, true);
