@@ -8,7 +8,11 @@ date_default_timezone_set('PRC');
 $stat = Typecho_Widget::widget('Widget_Stat');
 
 $db = Typecho_Db::get();
-$prefix = $db->getPrefix();
+//$prefix = $db->getPrefix();
+
+if (isset($_REQUEST['clear'])) {
+    $db->query($db->delete('table.comment_push'));
+}
 
 //计算分页
 $pageSize = 20;
@@ -33,13 +37,17 @@ $current = $db->fetchAll($db->select()->from('table.comment_push')
                 <div class="typecho-list-operate clearfix">
                     <form method="POST"
                           action="<?php $options->adminUrl('extending.php?panel=CommentPush/Logs.php'); ?>">
+                        <input type="hidden" name="clear" value="true">
+                        <button class="btn btn-s"><?php _e('清除日志'); ?></button>
+                    </form>
+                    <form method="POST"
+                          action="<?php $options->adminUrl('extending.php?panel=CommentPush/Logs.php'); ?>">
                         <div class="search" role="search">
-
 
                             <select name="page">
                                 <?php for ($i = 1; $i <= $pageCount; $i++): ?>
                                     <option
-                                        value="<?php echo $i; ?>"<?php if ($i == $currentPage): ?> selected="true"<?php endif; ?>>
+                                            value="<?php echo $i; ?>"<?php if ($i == $currentPage): ?> selected="true"<?php endif; ?>>
                                         第<?php echo $i; ?>页
                                     </option>
                                 <?php endfor; ?>

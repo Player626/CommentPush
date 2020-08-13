@@ -4,7 +4,7 @@
  *
  * @package CommentPush
  * @author 高彬展,奥秘Sir
- * @version 1.7.0
+ * @version 1.7.1
  * @link https://github.com/gaobinzhan/CommentPush
  * @blog https://blog.gaobinzhan.com
  */
