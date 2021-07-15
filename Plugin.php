@@ -3,10 +3,10 @@
  * 评论通知推送多服务
  *
  * @package CommentPush
- * @author 高彬展,奥秘Sir
+ * @author stitch,奥秘Sir
  * @version 1.7.1
- * @link https://github.com/gaobinzhan/CommentPush
- * @blog https://blog.gaobinzhan.com
+ * @link https://github.com/Stitch-June/CommentPush
+ * @blog https://stitch.cn
  */
 
 require 'lib/QQService.php';
