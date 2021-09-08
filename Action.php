@@ -1,7 +1,7 @@
 <?php
 /**
- * @author gaobinzhan <gaobinzhan@gmail.com>
- * @link https://blog.gaobinzhan.com
+ * @author stitch <gaobinzhan@gmail.com>
+ * @link https://stitch.cn
  */
 
 class CommentPush_Action extends Typecho_Widget implements Widget_Interface_Do
