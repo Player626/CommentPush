@@ -49,7 +49,7 @@ class WeChatService extends Service
                 ]
             ]);
 
-            $result = file_get_contents('https://sc.ftqq.com/' . $weChatScKey . '.send', false, $context);
+            $result = file_get_contents('https://sctapi.ftqq.com/' . $weChatScKey . '.send', false, $context);
             self::logger(__CLASS__, '', $params, $result);
         } catch (\Exception $exception) {
             self::logger(__CLASS__, '', '', '', $exception->getMessage());
