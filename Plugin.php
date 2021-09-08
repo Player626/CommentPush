@@ -4,7 +4,7 @@
  *
  * @package CommentPush
  * @author stitch,奥秘Sir
- * @version 1.7.1
+ * @version 1.7.3
  * @link https://github.com/Stitch-June/CommentPush
  * @blog https://stitch.cn
  */
