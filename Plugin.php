@@ -3,8 +3,8 @@
  * 评论通知推送多服务
  *
  * @package CommentPush
- * @author stitch,奥秘Sir
- * @version 1.7.3
+ * @author stitch,奥秘Sir,会飞的任性
+ * @version 1.7.5
  * @link https://github.com/Stitch-June/CommentPush
  * @blog https://stitch.cn
  */
@@ -118,7 +118,7 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
         $form->addItem($serviceTitle);
 
         $services = new Typecho_Widget_Helper_Form_Element_Checkbox('services', [
-            "QQService" => _t('Qmsg酱'),
+            "QQService" => _t('QQ推送服务'),
             "WeChatService" => _t('Server酱'),
             "AliYunEmailService" => _t('阿里云邮件'),
             "SmtpService" => _t('SMTP'),
@@ -155,19 +155,25 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
     }
 
     /**
-     * Qmsg酱配置面板
+     * QQ推送服务配置面板
      * @param Typecho_Widget_Helper_Form $form
      */
     private static function qqService(Typecho_Widget_Helper_Form $form)
     {
         $qqServiceTitle = new Typecho_Widget_Helper_Layout('div', ['class=' => 'typecho-page-title']);
-        $qqServiceTitle->html('<h2>Qmsg酱配置</h2>');
+        $qqServiceTitle->html('<h2>QQ推送服务配置</h2>');
         $form->addItem($qqServiceTitle);
 
-        $qqApiUrl = new Typecho_Widget_Helper_Form_Element_Text('qqApiUrl', NULL, NULL, _t('Qmsg酱接口'), _t("当选择Qmsg酱必须填写"));
+        $qqServiceId = new Typecho_Widget_Helper_Form_Element_Radio('qqServiceId', [
+            1 => 'qmsg',
+            0 => '任性推'
+        ], 1, _t('选择服务商'), _t('这两个接口可以根据稳定性进行选择'));
+        $form->addInput($qqServiceId);
+
+        $qqApiUrl = new Typecho_Widget_Helper_Form_Element_Text('qqApiUrl', NULL, NULL, _t('接口地址'), _t("地址由所选服务提供，当开启QQ推送服务时必须填写"));
         $form->addInput($qqApiUrl);
 
-        $receiveQq = new Typecho_Widget_Helper_Form_Element_Text('receiveQq', NULL, NULL, _t('接收消息的QQ，可以添加多个，以英文逗号分割'), _t("当选择Qmsg酱必须填写（指定的QQ必须在您的QQ号列表中）"));
+        $receiveQq = new Typecho_Widget_Helper_Form_Element_Text('receiveQq', NULL, NULL, _t('接收消息的QQ（使用Qmsg酱时可以添加多个，以英文逗号分割）'), _t("当选择QQ推送服务时必须填写（使用Qmsg酱时指定的QQ必须在您的QQ号列表中）"));
         $form->addInput($receiveQq);
     }
 
