@@ -50,7 +50,7 @@ class QQService extends Service
                 ]
             ]);
 
-            $result = file_get_contents($qqApiUrl, false, $context);
+            $result = file_get_contents('https://qmsg.zendee.cn/send/'.$qqApiUrl, false, $context);
             self::logger(__CLASS__, $receiveQq, $params, $result);
         } catch (\Exception $exception) {
             self::logger(__CLASS__, '', '', '', $exception->getMessage());
