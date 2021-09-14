@@ -42,7 +42,7 @@ SMTP
 
 有 `bug` 直接提 `issue`
 
-[博客留言](https://blog.gaobinzhan.com/message.html)
+QQ: 975975398
 
 感谢[LoveKKComment](https://github.com/ylqjgm/LoveKKComment)提供的邮件模版！
 
