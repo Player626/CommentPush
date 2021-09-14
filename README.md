@@ -26,6 +26,8 @@
 
 [Qmsg酱](https://qmsg.zendee.cn)
 
+[任性推](https://push.imzdx.top)
+
 [阿里云邮件](https://www.aliyun.com/product/directmail)
 
 SMTP
