@@ -168,7 +168,7 @@ class SmtpService extends Service
     {
         $className = 'Widget_Abstract_' . $table;
         $db = Typecho_Db::get();
-        $widget = $className::alloc();
+        $widget = new $className(Typecho_Request::getInstance(), Typecho_Widget_Helper_Empty::getInstance());
         $db->fetchRow($widget->select()->where($key . ' = ?', $val)->limit(1), array($widget, 'push'));
 
         return $widget;
