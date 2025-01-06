@@ -125,7 +125,7 @@ class CommentPush_Plugin implements Typecho_Plugin_Interface
             "DingTalkBotService" => _t('钉钉机器人'),
             "EnterpriseWeChatService" => _t('企业微信机器人'),
             "OfficialAccountService" => _t('微信公众号')
-        ], 'services', _t('推送服务 多选同时推送'), _t('插件作者：<a href="https://blog.gaobinzhan.com">高彬展</a>&nbsp;<a href="https://blog.say521.cn/">奥秘Sir</a>'));
+        ], [], _t('推送服务 多选同时推送'), _t('插件作者：<a href="https://blog.gaobinzhan.com">高彬展</a>&nbsp;<a href="https://blog.say521.cn/">奥秘Sir</a>'));
         $form->addInput($services->addRule('required', _t('必须选择一项推送服务')));
 
         $isPushBlogger = new Typecho_Widget_Helper_Form_Element_Radio('isPushBlogger', [
